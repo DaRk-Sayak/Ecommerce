@@ -12,7 +12,14 @@ export class ProductListComponent implements OnInit {
 
   products: Product[]=[];
   currentCategoryId: number=1;
+  perviousCategoryId:number=1;
   search:boolean=false;
+
+  pageNo:number=1;
+  pageSize:number=2;
+  theTotalElement:number=0;
+
+
   constructor(private productService: ProductService,
     private route:ActivatedRoute) { }
 
@@ -21,7 +28,11 @@ export class ProductListComponent implements OnInit {
       this.listProducts();
     });
   }
-
+  updatePageSize(value:string){
+    this.pageSize=+value;
+    this.pageNo=1;
+    this.listProducts();
+  }
   //Getting the data from the ProductService and putting it in array
 
   listProducts() {
@@ -45,18 +56,23 @@ export class ProductListComponent implements OnInit {
 
   handeleListProducts(){
     const hasCategoryId :boolean=this.route.snapshot.paramMap.has('id');
-    console.log(hasCategoryId);
     if(hasCategoryId){
       this.currentCategoryId = +this.route.snapshot.paramMap.get('id')!;
     }
-    else{
-      this.currentCategoryId=2;
+    if(this.perviousCategoryId!=this.currentCategoryId){
+      this.pageNo=1;
     }
-    this.productService.getProductList(this.currentCategoryId).subscribe(
-      data => {
-        this.products = data;
-      }
-    );
+    this.perviousCategoryId=this.currentCategoryId;
+
+    this.productService.getProductListPage(this.pageNo-1,this.pageSize,this.currentCategoryId).subscribe(
+      data=>{
+        this.products=data._embedded.products;
+        this.pageNo=data.page.number+1;
+        this.pageSize=data.page.size;
+        this.theTotalElement=data.page.totalElements;
+        console.log(this.theTotalElement)
+      });
+    }
   }
 
-}
+

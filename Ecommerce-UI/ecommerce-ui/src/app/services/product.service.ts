@@ -43,10 +43,22 @@ export class ProductService {
     return this.httpClient.get<Product>(productDetailsUrl);
   }
 
+  getProductListPage(pageNo:number,pageSize:number,CategoryId:number):Observable<GetResponseProduct>{
+    const searchUrl=`${this.baseUrl}/search/findByCategoryId?id=${CategoryId}`
+                     +`&page=${pageNo}&size=${pageSize}`;
+    return this.httpClient.get<GetResponseProduct>(searchUrl);
+  }
+
 }
 interface GetResponseProduct{
   _embedded:{
     products:Product[];
+  },
+  page:{
+    size:number,
+    totalElements:number,
+    totalPage:number,
+    number:number
   }
 }
 
